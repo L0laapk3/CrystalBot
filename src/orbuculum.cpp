@@ -15,6 +15,9 @@
 #include "rlbot/interface.h"
 #include "rlbot/statesetting.h"
 
+#include "actionSequence.h"
+#include "simulate.h"
+
 
 
 Orbuculum::Orbuculum(int _index, int _team, std::string _name) : Bot(_index, _team, _name) {
@@ -35,30 +38,71 @@ Orbuculum::Orbuculum(int _index, int _team, std::string _name) : Bot(_index, _te
 }
 
 
+int reset = 0;
+int lastTick = 0;
+int seqStartTick = 0;
+bool stateSet = false;
+
+ActionSequence seq;
+ActionSequenceExecutor seqEx;
+ActionSequenceExecutor simSeqEx;
 RLBotBM::ControllerInput Orbuculum::GetOutput(RLBotBM::GameState& state) {
     readState(game, state);
+	int dt = state.tick - lastTick;
+	lastTick = state.tick;
 
-    // Rendering and ball prediction example
+	if (reset > 250) {
+		reset = 0;
+		seq.clear();
+		seq.push_back({ 53, { .throttle = 1, .boost = 1 } });
+		seq.push_back({ 40, { .throttle = 1, .steer = -1, .boost = 1 } });
+		seq.push_back({ 10, { .throttle = 1, .boost = 1 } });
+		seq.push_back({ 30, { .throttle = 1, .jump = 1, .boost = 1 } });
 
-	// This renderer will build and send the packet once it goes out of scope.
-	RLURenderer renderer(std::to_string(index)); // Use index as the group name so it differs across instances
+		seqEx.reset();
 
-	renderer.DrawString2D("Hello world!", rlbot::Color::green, {10, 10}, 4, 4);
-	renderer.DrawOBB(rlbot::Color::green, game.cars[index].hitbox()); // Render car hitbox
-
-	// Predict the ball for 2 seconds and render the predicted positions
-	std::vector<vec3> points;
-	Ball copy = game.ball;
-	while (copy.time < game.time + 4.f) {
-		copy.step(1.f / 120.f);
-		points.push_back(copy.position);
+		stateSet = true;
 	}
-	renderer.DrawPolyLine3D(rlbot::Color::red, points);
 
-    // Drive towards the ball
-    Drive drive(game.cars[index]);
-    drive.target = game.ball.position;
-    drive.step(1.0f / 120.0f);
+	if (stateSet && game.cars[index].velocity[0] > 800.f) {
+		if (game.ball.position[0] != 1000)
+			return { .throttle = 1.f };
 
-    return inputToController(drive.controls);
+		std::cout << "set: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << std::endl;
+
+		simulate(simSeqEx, game.cars[index], game.ball, seq, getLength(seq) - 1, [&](Car& car, Ball& ball, int tick) {
+			return std::abs(ball.velocity[0]) >= .1f;
+		}, [&](Car& car, Ball& ball, int tick, bool timeout) {
+			std::cout << "sim: " << car.position[0] << ' ' << car.position[1] << "   " << ball.position[0] << ' ' << ball.position[1] << ' ' << tick << std::endl;
+		});
+		seqStartTick = state.tick;
+		stateSet = false;
+	}
+		
+	if (!stateSet && seqEx.step(seq, dt)) {
+		if (reset == 0)
+			std::cout << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << std::endl;
+
+		reset += dt;
+		if (reset >= 250 && reset - dt < 250) {
+			rlbot::GameState gameState = rlbot::GameState();
+			gameState.ballState.physicsState.location = { 1000, 0, 100 };
+			gameState.ballState.physicsState.velocity = { 0, 0, 0 };
+			gameState.ballState.physicsState.angularVelocity = { 0, 0, 0 };
+
+			gameState.carStates[index] = rlbot::CarState();
+			gameState.carStates[index]->physicsState.location = { 0, 2500, 25.53 };
+			gameState.carStates[index]->physicsState.velocity = { 0, 0, 0 };
+			gameState.carStates[index]->physicsState.angularVelocity = { 0, 0, 0 };
+			gameState.carStates[index]->physicsState.rotation = { 0, -1, 0 };
+			gameState.carStates[index]->boostAmount = 100;
+			rlbot::Interface::SetGameState(gameState);
+		}
+
+		return { .throttle = 1.f };
+	}
+
+
+
+    return seqEx.getInput(seq);
 }

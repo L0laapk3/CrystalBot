@@ -15,6 +15,19 @@ mat3 quatToRLU(const RLBotBM::Shared::Quat& q) {
 	};
 }
 
+Input inputToRLU(const RLBotBM::Shared::ControllerInput& i) {
+	return {
+		.steer = i.steer,
+		.roll = i.roll,
+		.pitch = i.pitch,
+		.yaw = i.yaw,
+		.throttle = i.throttle,
+		.jump = (bool)i.jump,
+		.boost = (bool)i.boost,
+		.handbrake = (bool)i.handbrake,
+	};
+}
+
 vec3 flatVectorToVec3(const rlbot::flat::Vector3 *v) {
     return vec3{v->x(), v->y(), v->z()};
 }
