@@ -1,4 +1,4 @@
-#include "examplebot.h"
+#include "orbuculum.h"
 
 #include "rlbot/bot.h"
 #include "rlbot/botmanager.h"
@@ -19,7 +19,7 @@ uint16_t getPortFromFile(std::string filename) {
 }
 
 rlbot::Bot *botFactory(int index, int team, std::string name) {
-    return new RLUtilitiesExampleBot(index, team, name);
+    return new Orbuculum(index, team, name);
 }
 
 int main(int argc, char **argv) {

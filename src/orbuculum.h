@@ -3,12 +3,10 @@
 #include "simulation/game.h"
 #include "rlbot/bot.h"
 
-class RLUtilitiesExampleBot : public rlbot::Bot {
+class Orbuculum : public rlbot::Bot {
     Game game;
 public:
-    RLUtilitiesExampleBot(int _index, int _team, std::string _name);
-
-    ~RLUtilitiesExampleBot();
+    Orbuculum(int _index, int _team, std::string _name);
 
     RLBotBM::ControllerInput GetOutput(RLBotBM::GameState& state) override;
 };
