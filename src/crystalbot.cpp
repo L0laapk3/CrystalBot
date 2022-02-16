@@ -6,7 +6,6 @@
 #include <simulation/game.h>
 #include <mechanics/drive.h>
 #include <simulation/field.h>
-#include <utils/bridge.h>
 #include <rlutilities.h>
 #include <utils/rlurenderer.h>
 
@@ -16,6 +15,7 @@
 #include "rlbot/statesetting.h"
 #include "rlbot/bminterface.h"
 
+#include "utils/bridge.h"
 #include "actionSequence.h"
 #include "simulate.h"
 
@@ -90,20 +90,6 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 
 		reset += dt;
 		if (reset >= EXTRA_TICKS && reset - dt < EXTRA_TICKS) {
-
-			// rlbot::GameState gameState = rlbot::GameState();
-			// gameState.ballState.physicsState.location = { 1000, 0, 100 };
-			// gameState.ballState.physicsState.velocity = { 0, 0, 0 };
-			// gameState.ballState.physicsState.angularVelocity = { 0, 0, 0 };
-
-			// gameState.carStates[index] = rlbot::CarState();
-			// gameState.carStates[index]->physicsState.location = { 0, 2500, 25.53 };
-			// gameState.carStates[index]->physicsState.velocity = { 0, 0, 0 };
-			// gameState.carStates[index]->physicsState.angularVelocity = { 0, 0, 0 };
-			// gameState.carStates[index]->physicsState.rotation = { 0, -1, 0 };
-			// gameState.carStates[index]->boostAmount = 100;
-			// rlbot::Interface::SetGameState(gameState);
-
 			
 			stateSetObj.balls[0].position = { 1000, 0, 100 };
 			stateSetObj.balls[0].velocity = { 0, 0, 0 };
@@ -112,7 +98,10 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 			stateSetObj.cars[index].position = { 0, 2500, 25.53 };
 			stateSetObj.cars[index].velocity = { 0, 0, 0 };
 			stateSetObj.cars[index].angularVelocity = { 0, 0, 0 };
-			stateSetObj.cars[index].orientation = { 0, -1, 0 };
+			auto quat = quatFromRPY({ 0, 0, -1 });
+			stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::Shared::StateSetQuat&>(quat);
+			for (auto& wheel : stateSetObj.cars[index].wheels)
+				wheel.spinSpeed = -80;
 			stateSetObj.cars[index].boost = 100;
 
 			stateSetObj.setAny = true;

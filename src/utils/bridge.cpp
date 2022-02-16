@@ -15,6 +15,23 @@ mat3 quatToRLU(const RLBotBM::Shared::Quat& q) {
 	};
 }
 
+RLBotBM::Shared::Quat quatFromRPY(std::array<float, 3> rpy) {
+	float cr = cosf(rpy[0] * 0.5f);
+	float sr = sinf(rpy[0] * 0.5f);
+	float cp = cosf(rpy[1] * 0.5f);
+	float sp = sinf(rpy[1] * 0.5f);
+	float cy = cosf(rpy[2] * 0.5f);
+	float sy = sinf(rpy[2] * 0.5f);
+
+	return {
+		.x = sr * cp * cy - cr * sp * sy,
+		.y = cr * sp * cy + sr * cp * sy,
+		.z = cr * cp * sy - sr * sp * cy,
+		.w = cr * cp * cy + sr * sp * sy,
+	};
+}
+
+
 Input inputToRLU(const RLBotBM::Shared::ControllerInput& i) {
 	return {
 		.steer = i.steer,
