@@ -4,13 +4,13 @@
 #include <rlbot/packets.h>
 #include "RLBotBM.h"
 
-vec3 vec3ToRLU(const RLBotBM::Shared::Vec3& v);
+vec3 vec3ToRLU(const RLBotBM::Vec3& v);
 
-mat3 quatToRLU(const RLBotBM::Shared::Quat& q);
+mat3 quatToRLU(const RLBotBM::Quat& q);
 
-RLBotBM::Shared::Quat quatFromRPY(std::array<float, 3> rpy);
+RLBotBM::Quat quatFromRPY(std::array<float, 3> rpy);
 
-Input inputToRLU(const RLBotBM::Shared::ControllerInput& i);
+Input inputToRLU(const RLBotBM::ControllerInput& i);
 
 vec3 flatVectorToVec3(const rlbot::flat::Vector3 *v);
 

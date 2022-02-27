@@ -19,6 +19,8 @@
 #include "actionSequence.h"
 #include "simulate.h"
 
+#include "utils/renderBall.h"
+
 
 
 CrystalBot::CrystalBot(int _index, int _team, std::string _name) : Bot(_index, _team, _name) {
@@ -49,8 +51,13 @@ constexpr int EXTRA_TICKS = 1;
 ActionSequence seq;
 ActionSequenceExecutor seqEx;
 ActionSequenceExecutor simSeqEx;
-RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
-    readState(game, state);
+bool seqInitialized = false;
+RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
+    if (!seqInitialized) {
+    	seqEx.reset(seq.begin());
+		seqInitialized = true;
+	}
+
 	auto& stateSetObj = rlbot::bmInterface->getStateSetObj();
 	int dt = state.tick - lastTick;
 	lastTick = state.tick;
@@ -64,7 +71,7 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 		seq.push_back({ 20, { .throttle = 1, .steer = (rand() % 3) - 1.f }});
 		// seq.push_back({ 30, { .throttle = 1, .jump = 1, .boost = 1 } });
 
-		seqEx.reset();
+		seqEx.reset(seq.begin());
 
 		stateSet = true;
 	}
@@ -84,7 +91,7 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 		stateSet = false;
 	}
 		
-	if (!stateSet && seqEx.step(seq, dt)) {
+	if (!stateSet && seqEx.step(seq.end(), dt)) {
 		if (reset == 0)
 			std::cout << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << std::endl;
 
@@ -99,7 +106,7 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 			stateSetObj.cars[index].velocity = { 0, 0, 0 };
 			stateSetObj.cars[index].angularVelocity = { 0, 0, 0 };
 			auto quat = quatFromRPY({ 0, 0, -1 });
-			stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::Shared::StateSetQuat&>(quat);
+			stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
 			for (auto& wheel : stateSetObj.cars[index].wheels)
 				wheel.spinSpeed = -80;
 			stateSetObj.cars[index].boost = 100;
@@ -113,5 +120,21 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 
 
 
-    return seqEx.getInput(seq);
+    return seqEx.getInput();
+}
+
+
+RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
+    readState(game, state);
+
+	RLURenderer renderer(std::to_string(index)); 
+	renderBall(renderer, state.balls[0], rlbot::Color::cyan);
+
+	auto controls = tick(state);
+
+	if (lastControls.full())
+		lastControls.pop_front();
+	lastControls.push_back(controls);
+
+	return { };
 }

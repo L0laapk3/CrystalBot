@@ -3,11 +3,11 @@
 #include <simulation/game.h>
 #include <rlbot/packets.h>
 
-vec3 vec3ToRLU(const RLBotBM::Shared::Vec3& v) {
+vec3 vec3ToRLU(const RLBotBM::Vec3& v) {
     return { v.x, v.y, v.z };
 }
 
-mat3 quatToRLU(const RLBotBM::Shared::Quat& q) {
+mat3 quatToRLU(const RLBotBM::Quat& q) {
     return {
 		{ 1 - 2 * (q.y * q.y + q.z * q.z), 2 * (q.x * q.y - q.w * q.z), 2 * (q.x * q.z + q.w * q.y) },
 		{ 2 * (q.x * q.y + q.w * q.z), 1 - 2 * (q.x * q.x + q.z * q.z), 2 * (q.y * q.z - q.w * q.x) },
@@ -15,7 +15,7 @@ mat3 quatToRLU(const RLBotBM::Shared::Quat& q) {
 	};
 }
 
-RLBotBM::Shared::Quat quatFromRPY(std::array<float, 3> rpy) {
+RLBotBM::Quat quatFromRPY(std::array<float, 3> rpy) {
 	float cr = cosf(rpy[0] * 0.5f);
 	float sr = sinf(rpy[0] * 0.5f);
 	float cp = cosf(rpy[1] * 0.5f);
@@ -32,7 +32,7 @@ RLBotBM::Shared::Quat quatFromRPY(std::array<float, 3> rpy) {
 }
 
 
-Input inputToRLU(const RLBotBM::Shared::ControllerInput& i) {
+Input inputToRLU(const RLBotBM::ControllerInput& i) {
 	return {
 		.steer = i.steer,
 		.roll = i.roll,

@@ -13,25 +13,30 @@ int getLength(const ActionSequence& seq) {
 }
 
 
-void ActionSequenceExecutor::reset() {
-	currentStep = 0;
+void ActionSequenceExecutor::reset(ActionSequence::const_iterator begin) {
+	currentStep = begin;
 	actionTicks = 0;
 }
 
-bool ActionSequenceExecutor::step(const ActionSequence& seq, int ticks) {
+bool ActionSequenceExecutor::step(ActionSequence::const_iterator end, int ticks) {
+	actionTicks += ticks;
+	
 	while (true) {
-		if (currentStep >= seq.size())
+		if (finished(end))
 			return true;
-			
-		actionTicks += ticks;
-		if (actionTicks < seq[currentStep].duration)
+
+		if (actionTicks < currentStep->duration)
 			return false;
 		
-		actionTicks -= seq[currentStep].duration;
+		actionTicks -= currentStep->duration;
 		currentStep++;
 	}
 }
 
-RLBotBM::ControllerInput ActionSequenceExecutor::getInput(const ActionSequence& seq) {
-	return seq[currentStep].input;
+bool ActionSequenceExecutor::finished(ActionSequence::const_iterator end) {
+	return currentStep >= end;
+}
+
+const RLBotBM::ControllerInput& ActionSequenceExecutor::getInput() {
+	return currentStep->input;
 }
