@@ -25,8 +25,8 @@ void renderCircle(RLURenderer& renderer, const vec3& center, float radius, const
 
 void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color color) {
 	auto sphereCenter = vec3ToRLU(ball.position) + vec3{300, 0, 0};
-	constexpr int numCircles = 3;
-	constexpr float cornerSpace = -.125f;
+	constexpr int numCircles = 5;
+	constexpr float cornerSpace = .125f;
 
 	constexpr int sideCircles = numCircles / 2;
 	constexpr bool middleCircle = numCircles % 2;
@@ -116,7 +116,7 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 			for (int j = 0; j < sinCos.size(); j++) {
 				const auto& [sin2, cos2] = sinCos[j];
 				const auto sin2s = copysignf(sin2, dir), cos2s = copysignf(cos2, dir);
-				if ((dir == -1 || !middleCircle || i) && i == j && 0) {
+				if ((dir == -1 || !middleCircle || i) && i == j) {
 					const auto circleCenter = sphereCenter + sin2s * axes[1];
 					const auto circleFrom = cos2s * axes[0], circleTo = cos2 * axes[2];
 					arc45start(circleCenter, circleFrom, circleTo, j);
@@ -138,22 +138,22 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 			for (int j = sinCos.size(); j --> 1;) {
 				const auto& [sin2, cos2] = sinCos[j];
 				const auto sin2s = copysignf(sin2, dir), cos2s = copysignf(cos2, dir);
-				if (i == j && dir == 1) {
+				if (i == j) {
 					auto sIt = it;
 					arc360OffsetStart(sphereCenter + sin2s * axes[0],  cos2s * axes[1], cos2 * axes[2], j);
 
 
-					// sin * axes0
-					// cos * cos * axes1
-					// cos * sin * axes2
-					renderer.DrawLine3D(rlbot::Color::red, sphereCenter, *sIt);
+					// sin2 * axes0
+					// cos2 * cos3 * axes1
+					// cos2 * sin3 * axes2
+					// renderer.DrawLine3D(rlbot::Color::red, sphereCenter, *sIt);
 				}
 				*it++ = sphereCenter + sinAxes[2] + sin2s * cosAxes[0] + cos2s * cosAxes[1];
-				if (i == j && dir == 1)
-					// sin * cos * axes0
-					// cos * cos * axes1
-					// sin * axes2
-					renderer.DrawLine3D(rlbot::Color::green, sphereCenter, *(it - 1));
+				// if (i == j)
+					// cos1 * sin2 * axes0
+					// cos1 * cos2 * axes1
+					// sin1 * axes2
+					// renderer.DrawLine3D(rlbot::Color::green, sphereCenter, *(it - 1));
 			}
 			if (dir == 1 && middleCircle && !i)
 				arc360(sphereCenter, axes[1], axes[2]);
