@@ -20,7 +20,7 @@ endif (UNIX)
 
 target_link_libraries(CrystalBot rlutilities_cpp)
 
-target_compile_features(CrystalBot PRIVATE cxx_std_17)
+target_compile_features(CrystalBot PRIVATE cxx_std_20)
 
 # Copy port config to output folder
 add_custom_command(TARGET CrystalBot POST_BUILD

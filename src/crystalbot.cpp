@@ -32,12 +32,6 @@ CrystalBot::CrystalBot(int _index, int _team, std::string _name) : Bot(_index, _
 
     // Read field info. Only needs to be called once
     readFieldInfo(game, GetFieldInfo());
-
-    // State setting example
-    rlbot::GameState gameState = rlbot::GameState();
-    gameState.ballState.physicsState.location = {0, 0, 1000};
-    gameState.ballState.physicsState.velocity = {0, 0, 100};
-    rlbot::Interface::SetGameState(gameState);
 }
 
 
@@ -130,11 +124,11 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 	RLURenderer renderer(std::to_string(index)); 
 	renderBall(renderer, state.balls[0], rlbot::Color::cyan);
 
-	auto controls = tick(state);
+	// auto controls = tick(state);
 
-	if (lastControls.full())
-		lastControls.pop_front();
-	lastControls.push_back(controls);
+	// if (lastControls.full())
+	// 	lastControls.pop_front();
+	// lastControls.push_back(controls);
 
 	return { };
 }
