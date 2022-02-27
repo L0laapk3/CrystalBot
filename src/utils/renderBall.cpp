@@ -25,8 +25,10 @@ void renderCircle(RLURenderer& renderer, const vec3& c, float radius, const vec3
 
 void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color color) {
 	auto sphereCenter = vec3ToRLU(ball.position) + vec3{300, 0, 0};
-	constexpr int numCircles = 5;
-	constexpr float cornerSpace = .125f;
+	constexpr int numCircles = 3;
+	constexpr float cornerSpace = .1f;
+	// constexpr int numCircles = 5;
+	// constexpr float cornerSpace = .145f;
 
 	const auto ballRotator = quatToRLU(ball.orientation);
 	std::array axes { vec3{ 1, 0, 0 }, vec3{ 0, 1, 0 }, vec3{ 0, 0, 1 } };
@@ -49,17 +51,19 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 
 	for (int i = 0; i < axes.size(); i++)
 		for (int j = 0; j < numArcPoints; j++) {
-			float sin = (j + !middleCircle) * stepPerSideCircle;
+			float sin = (j + ((float)!middleCircle) / 2) * stepPerSideCircle;
 			allAxesM[j][i].sin = sin * axes[i];
-			const vec3 cosAxis = sqrtf(1 - sin * sin) * axes[i];
+			float cos = sqrtf(1 - sin * sin);
 			for (int k = 0; k < numArcPoints; k++) {
-				float sin = (k + !middleCircle) * stepPerSideCircle;
-				allAxesM[j][i].cosSin[k] = sin * cosAxis;
-				allAxesM[j][i].cosCos[k] = sqrtf(1 - sin * sin) * cosAxis;
+				// sin[k] has to be equal to cosSin[...][k]
+				float cosSin = (k + ((float)!middleCircle) / 2) * stepPerSideCircle;
+				allAxesM[j][i].cosSin[k] = cosSin * axes[i];
+				float sin = cosSin / cos;
+				allAxesM[j][i].cosCos[k] = sqrtf(1 - sin * sin) * cos * axes[i];
 			}
 		}
 
-	std::vector<vec3> points{ 1200 }; // todo: calculate
+	std::vector<vec3> points{ numCircles * 4 * numCircles * 3 + 1 }; // todo: some extra points for even numbers
 	auto it = points.begin();
 
 	auto cInv = [&](vec3 v, bool inv) {
@@ -80,7 +84,7 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 			arcPoint(axes[c].sin, axes[f].cosCos[k], axes[t].cosSin[k], fc, ff, ft);
 	};
 	auto arc45r = [&](int c, int f, int t, const AxesM& axes, bool fc = false, bool ff = false, bool ft = false) {
-		for (auto k = numArcPoints - 1; k > 0; k--)
+		for (auto k = numArcPoints; k --> middleCircle; )
 			arcPoint(axes[c].sin, axes[t].cosCos[k], axes[f].cosSin[k], fc, ft, ff);
 	};
 	auto arc90 = [&](int c, int f, int t, const AxesM& axes, bool fc = false, bool ff = false, bool ft = false) {
@@ -99,7 +103,7 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 		arc45start(c, f, t, axes, startAt, fc, ff, ft);
 		arc45r(c, f, t, axes, fc, ff, ft);
 		arc270(c, t, f, axes, fc, ft, !ff);
-		arc45end(c, f, t, axes, fc, startAt, ff, ft);
+		arc45end(c, f, t, axes, startAt, fc, ff, ft);
 	};
 	auto arc360 = [&](int c, int f, int t, const AxesM& axes, bool fc = false, bool ff = false, bool ft = false) {
 		arc360OffsetStart(c, f, t, axes, 0, fc, ff, ft);
@@ -129,24 +133,13 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 					
 				arcPoint(axesM[2].sin, axesM[0].cosCos[j], axesM[1].cosSin[j], false, dir, dir);
 			}
-			for (int j = numArcPoints; j --> 1;) {
-				if (i == j) {
+			for (int j = numArcPoints; j --> middleCircle;) {
+				if (i == j)
 					arc360OffsetStart(0, 1, 2, axesM, j, dir, dir, false);
-
-					// sin2 * axes0
-					// cos2 * cos3 * axes1
-					// cos2 * sin3 * axes2
-					// renderer.DrawLine3D(rlbot::Color::red, sphereCenter, firstPoint);
-				}
 				arcPoint(axesM[2].sin, axesM[1].cosCos[j], axesM[0].cosSin[j], false, dir, dir);
-				// if (i == j && dir == 1)
-				// 	// cos1 * sin2 * axes0
-				// 	// cos1 * cos2 * axes1
-				// 	// sin1 * axes2
-				// 	renderer.DrawLine3D(rlbot::Color::green, sphereCenter, *(it - 1));
 			}
-			if (dir == 1 && middleCircle && !i)
-				arc360(0, 1, 2, axesM, false, true, true);
+			if (middleCircle && !i && dir == 0)
+				arc360(0, 1, 2, axesM, false, false, false);
 			arc90(2, 1, 0, axesM, false, dir, !dir);
 		}
 		
@@ -163,10 +156,10 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 		arc270(1, 2, 0, allAxesM[0], false, false, true);
 	}
 
-
-	// std::cout << it - points.begin() << std::endl;
-	points.resize(it - points.begin() + 1);
+	// std::cout << it - points.begin() << std::endl;;
+	// points.resize(it - points.begin());
 	points.back() = points.front();
+
 	renderer.DrawPolyLine3D(color, points);
 
 }
