@@ -23,7 +23,7 @@ endif (UNIX)
 
 target_link_libraries(${PROJECT_NAME} rlutilities_cpp)
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Copy port config to output folder
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

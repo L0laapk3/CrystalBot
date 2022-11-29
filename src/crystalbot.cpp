@@ -60,7 +60,7 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 		reset = 0;
 		seq.clear();
 		seq.push_back({ 53, { .throttle = 1, .boost = 1 } });
-		seq.push_back({ 4, { .throttle = 1, .steer = -1, .boost = 1 } });
+		seq.push_back({ 4,  { .throttle = 1, .boost = 1 , .steer = -1} });
 		seq.push_back({ 10, { .throttle = 1, .boost = 1 } });
 		seq.push_back({ 20, { .throttle = 1, .steer = (rand() % 3) - 1.f }});
 		// seq.push_back({ 30, { .throttle = 1, .jump = 1, .boost = 1 } });
@@ -84,7 +84,7 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 		seqStartTick = state.tick;
 		stateSet = false;
 	}
-		
+
 	if (!stateSet && seqEx.step(seq.end(), dt)) {
 		if (reset == 0)
 			std::cout << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << std::endl;
@@ -124,7 +124,7 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 	RLURenderer renderer(std::to_string(index)); 
 	renderBall(renderer, state.balls[0], rlbot::Color::cyan);
 
-	// auto controls = tick(state);
+	auto controls = tick(state);
 
 	// if (lastControls.full())
 	// 	lastControls.pop_front();
