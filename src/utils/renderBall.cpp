@@ -25,19 +25,19 @@ void renderCircle(RLURenderer& renderer, const vec3& c, float radius, const vec3
 constexpr float SQRT3 = 1.7320508075688772935274463415059f;
 
 void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color color) {
-	auto sphereCenter = vec3ToRLU(ball.position) + vec3{300, 0, 0};
-	// constexpr int numCircles = 3;
-	// constexpr std::array<int, (numCircles+1)/2> interAxisLines { 1, 1 };
-	// constexpr float cornerSpace = .1f;
-	// constexpr float stepPerSideCircle = (1.f - cornerSpace) / (numCircles / 2 + 1);
-	constexpr int numCircles = 5;
-	constexpr std::array<int, (numCircles+1)/2> interAxisLines { 0, 1, 1 };
-	constexpr float stepPerSideCircle = 1 / SQRT3 / (numCircles / 2); // this formula should be used when interAxisLines[0] = 0
+	auto sphereCenter = vec3{0, 0, 0};
+	constexpr int numCircles = 3;
+	constexpr std::array<int, (numCircles+1)/2> interAxisLines { 1, 1 };
+	constexpr float cornerSpace = .1f;
+	constexpr float stepPerSideCircle = (1.f - cornerSpace) / (numCircles / 2 + 1);
+	// constexpr int numCircles = 5;
+	// constexpr std::array<int, (numCircles+1)/2> interAxisLines { 0, 1, 1 };
+	// constexpr float stepPerSideCircle = 1 / SQRT3 / (numCircles / 2); // this formula should be used when interAxisLines[0] = 0
 
 	const auto ballRotator = quatToRLU(ball.orientation);
 	std::array axes { vec3{ 1, 0, 0 }, vec3{ 0, 1, 0 }, vec3{ 0, 0, 1 } };
 	for (auto& axis : axes)
-		axis = dot(ballRotator, axis) * ball.radius;
+		axis = axis * ball.radius;
 
 	constexpr int sideCircles = numCircles / 2;
 	constexpr bool middleCircle = numCircles % 2;
@@ -167,6 +167,10 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 	// std::cout << it - points.begin() << std::endl;;
 	// points.resize(it - points.begin());
 	points.back() = points.front();
+
+	for (auto& p : points)
+		std::cout << p << std::endl;
+	std::cout << std::endl << std::endl;
 
 	renderer.DrawPolyLine3D(color, points);
 
