@@ -45,6 +45,8 @@ constexpr int EXTRA_TICKS = 1;
 std::vector<float> different_values{};
 int stepcnt = 0;
 
+bool printed = false;
+
 ActionSequence seq;
 ActionSequenceExecutor seqEx;
 ActionSequenceExecutor simSeqEx;
@@ -63,13 +65,17 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 		reset = 0;
 		stepcnt = (stepcnt + 1) % 3;
 		float steer = (float)rand() / RAND_MAX * 2 - 1;
-		// float steer = stepcnt ? 1 : 0;
-		std::cout << "sequence steer: " << steer << std::endl;
+
+		int jumpTime = 100 * rand() / RAND_MAX;
+		std::cout << "sequence jumpTime: " << jumpTime << " steer: " << steer << std::endl;
 
 		seq.clear();
+		seq.push_back({ 1, { }}); // statesetting mo
 		seq.push_back({ 250, { .throttle = 1, .steer = -.1, .boost = 1 } });
-		seq.push_back({ 100,  { .throttle = 1, .steer = steer }});
-		// seq.push_back({ 30, { .throttle = 1, .jump = 1, .boost = 1 } });
+		seq.push_back({ 1,  { .throttle = 1, .steer = steer }});
+		seq.push_back({ 230,  { .throttle = 1, .yaw = steer, .pitch = steer, .roll = steer, .jump = 1 }});	
+		seq.push_back({ jumpTime, { .throttle = 1, .jump = 1, .boost = 1 } });
+		seq.push_back({ 1, { .throttle = 1, .steer = steer  }});	
 
 		seqEx.reset(seq.begin());
 
@@ -92,23 +98,19 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 	}
 
 	if (!stateSet && seqEx.step(seq.end(), dt)) {
-		if (reset == 0) {
-			if (std::find(different_values.begin(), different_values.end(), game.ball.position[0]) == different_values.end())
-				different_values.push_back(game.ball.position[0]);
-			std::cout << std::setprecision(20) << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << " #diff: " << different_values.size() << std::endl;
-		}
 
 		reset += dt;
 		if (reset >= EXTRA_TICKS && reset - dt < EXTRA_TICKS) {
+			auto quat = quatFromRPY({ 0, 0, -1 });
 			
-			stateSetObj.balls[0].position = { 1000, 0, 100 };
-			stateSetObj.balls[0].velocity = { 0, 0, 0 };
-			stateSetObj.balls[0].angularVelocity = { 0, 0, 0 };
+			// stateSetObj.balls[0].position = { 1000, 0, 100 };
+			// stateSetObj.balls[0].velocity = { 0, 0, 0 };
+			// stateSetObj.balls[0].angularVelocity = { 100, 0, 0 };
+			// stateSetObj.balls[0].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
 
 			stateSetObj.cars[index].position = { 0, 2500, 25.53 };
 			stateSetObj.cars[index].velocity = { 0, 0, 0 };
 			stateSetObj.cars[index].angularVelocity = { 0, 0, 0 };
-			auto quat = quatFromRPY({ 0, 0, -1 });
 			stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
 			// for (auto& wheel : stateSetObj.cars[index].wheels)
 			// 	wheel.spinSpeed = -80;
@@ -116,11 +118,35 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
 			stateSetObj.setAny = true;
 			std::cout << "do stateset" << std::endl;
+			printed = false;
 		}
 
 		return { .throttle = 1.f };
 	}
 
+	if (seqEx.currentStep == seq.end() - 1) {
+		if (std::find(different_values.begin(), different_values.end(), game.ball.position[1]) == different_values.end())
+			different_values.push_back(game.ball.position[1]);
+		std::cout << std::setprecision(20) << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << " #diff: " << different_values.size() << std::endl;
+		printed = true;
+	}
+
+	if (seqEx.currentStep == seq.end() - 1) {
+			stateSetObj.balls[0].position = { 1000, 0, 100 };
+			stateSetObj.balls[0].velocity = { 0, 0, 0 };
+			stateSetObj.balls[0].angularVelocity = { 100, 0, 0 };
+			auto quat = quatFromRPY({ 0, 0, -1 });
+			stateSetObj.balls[0].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
+
+			stateSetObj.cars[index].position = { 0, 2500, 25.53 };
+			stateSetObj.cars[index].velocity = { 0, 0, 0 };
+			stateSetObj.cars[index].angularVelocity = { 0, 0, 0 };
+			stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
+
+			stateSetObj.setAny = true;
+
+		printed = false;
+	}
 
 
     return seqEx.getInput();
