@@ -43,6 +43,7 @@ bool stateSet = false;
 constexpr int EXTRA_TICKS = 1;
 
 std::vector<float> different_values{};
+int stepcnt = 0;
 
 ActionSequence seq;
 ActionSequenceExecutor seqEx;
@@ -60,14 +61,14 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
 	if (reset > EXTRA_TICKS) {
 		reset = 0;
-		float steer = ((float)rand() / RAND_MAX) - 1.f;
+		stepcnt = (stepcnt + 1) % 3;
+		float steer = (float)rand() / RAND_MAX * 2 - 1;
+		// float steer = stepcnt ? 1 : 0;
 		std::cout << "sequence steer: " << steer << std::endl;
 
 		seq.clear();
-		seq.push_back({ 53, { .throttle = 1, .boost = 1 } });
-		seq.push_back({ 4,  { .throttle = 1, .boost = 1 , .steer = -1} });
-		seq.push_back({ 10, { .throttle = 1, .boost = 1 } });
-		seq.push_back({ 20, { .throttle = 1, .steer = steer }});
+		seq.push_back({ 250, { .throttle = 1, .steer = -.1, .boost = 1 } });
+		seq.push_back({ 100,  { .throttle = 1, .steer = steer }});
 		// seq.push_back({ 30, { .throttle = 1, .jump = 1, .boost = 1 } });
 
 		seqEx.reset(seq.begin());
@@ -75,9 +76,9 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 		stateSet = true;
 	}
 
-	if (stateSet && game.cars[index].velocity[0] > 800.f) {
-		if (game.ball.position[0] != 1000)
-			return { .throttle = 1.f };
+	if (stateSet) {
+		// if (game.ball.position[0] != 1000)
+		// 	return { .throttle = 1.f };
 
 		// std::cout << "set: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << std::endl;
 
@@ -92,11 +93,9 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
 	if (!stateSet && seqEx.step(seq.end(), dt)) {
 		if (reset == 0) {
-			if (std::find(different_values.begin(), different_values.end(), game.cars[index].position[0]) == different_values.end())
-				different_values.push_back(game.cars[index].position[0]);
-			if (std::find(different_values.begin(), different_values.end(), game.cars[index].position[1]) == different_values.end())
-				different_values.push_back(game.cars[index].position[1]);
-			std::cout << std::setprecision(13) << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << " #diff: " << different_values.size() << std::endl;
+			if (std::find(different_values.begin(), different_values.end(), game.ball.position[0]) == different_values.end())
+				different_values.push_back(game.ball.position[0]);
+			std::cout << std::setprecision(20) << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << " #diff: " << different_values.size() << std::endl;
 		}
 
 		reset += dt;
