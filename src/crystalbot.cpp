@@ -42,6 +42,8 @@ bool stateSet = false;
 
 constexpr int EXTRA_TICKS = 1;
 
+std::vector<float> different_values{};
+
 ActionSequence seq;
 ActionSequenceExecutor seqEx;
 ActionSequenceExecutor simSeqEx;
@@ -58,11 +60,14 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
 	if (reset > EXTRA_TICKS) {
 		reset = 0;
+		float steer = ((float)rand() / RAND_MAX) - 1.f;
+		std::cout << "sequence steer: " << steer << std::endl;
+
 		seq.clear();
 		seq.push_back({ 53, { .throttle = 1, .boost = 1 } });
 		seq.push_back({ 4,  { .throttle = 1, .boost = 1 , .steer = -1} });
 		seq.push_back({ 10, { .throttle = 1, .boost = 1 } });
-		seq.push_back({ 20, { .throttle = 1, .steer = (rand() % 3) - 1.f }});
+		seq.push_back({ 20, { .throttle = 1, .steer = steer }});
 		// seq.push_back({ 30, { .throttle = 1, .jump = 1, .boost = 1 } });
 
 		seqEx.reset(seq.begin());
@@ -86,8 +91,13 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 	}
 
 	if (!stateSet && seqEx.step(seq.end(), dt)) {
-		if (reset == 0)
-			std::cout << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << std::endl;
+		if (reset == 0) {
+			if (std::find(different_values.begin(), different_values.end(), game.cars[index].position[0]) == different_values.end())
+				different_values.push_back(game.cars[index].position[0]);
+			if (std::find(different_values.begin(), different_values.end(), game.cars[index].position[1]) == different_values.end())
+				different_values.push_back(game.cars[index].position[1]);
+			std::cout << std::setprecision(13) << "exe: " << game.cars[index].position[0] << ' ' << game.cars[index].position[1] << "   " << game.ball.position[0] << ' ' << game.ball.position[1] << ' ' << (state.tick - seqStartTick) << " #diff: " << different_values.size() << std::endl;
+		}
 
 		reset += dt;
 		if (reset >= EXTRA_TICKS && reset - dt < EXTRA_TICKS) {
@@ -101,8 +111,8 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 			stateSetObj.cars[index].angularVelocity = { 0, 0, 0 };
 			auto quat = quatFromRPY({ 0, 0, -1 });
 			stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
-			for (auto& wheel : stateSetObj.cars[index].wheels)
-				wheel.spinSpeed = -80;
+			// for (auto& wheel : stateSetObj.cars[index].wheels)
+			// 	wheel.spinSpeed = -80;
 			stateSetObj.cars[index].boost = 100;
 
 			stateSetObj.setAny = true;
@@ -130,5 +140,5 @@ RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
 	// 	lastControls.pop_front();
 	// lastControls.push_back(controls);
 
-	return { };
+	return controls;
 }

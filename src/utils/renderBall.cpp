@@ -168,10 +168,6 @@ void renderBall(RLURenderer& renderer, const RLBotBM::Ball& ball, rlbot::Color c
 	// points.resize(it - points.begin());
 	points.back() = points.front();
 
-	for (auto& p : points)
-		std::cout << p << std::endl;
-	std::cout << std::endl << std::endl;
-
 	renderer.DrawPolyLine3D(color, points);
 
 }
