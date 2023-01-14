@@ -4,8 +4,10 @@ project(CrystalBot LANGUAGES CXX)
 set(RLBOT-BM_CPP_DIR ${PROJECT_SOURCE_DIR}/RLBot-BM_CPP)
 set(RLBOT-BM_DIR ${RLBOT-BM_CPP_DIR}/RLBot-BM)
 set(RLUtilities_DIR ${PROJECT_SOURCE_DIR}/RLUtilities)
+set(Orbuculum_DIR ${PROJECT_SOURCE_DIR}/Orbuculum)
 add_subdirectory(${RLBOT-BM_CPP_DIR})
 add_subdirectory(${RLUtilities_DIR})
+add_subdirectory(${Orbuculum_DIR})
 
 file(GLOB_RECURSE sources ${PROJECT_SOURCE_DIR}/src/*.cpp ${RLBOT-BM_DIR}/src/shared/*.cpp)
 
@@ -14,11 +16,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${RLBOT-BM_CPP_DIR}/inc ${RLBOT-BM_CPP_DIR}/lib/inc)
 target_include_directories(${PROJECT_NAME} PRIVATE ${RLUtilities_DIR}/inc ${RLUtilities_DIR}/inc/*)
+target_include_directories(${PROJECT_NAME} PRIVATE ${Orbuculum_DIR}/inc ${Orbuculum_DIR}/inc/*)
 
 if (UNIX)
-    target_link_libraries(${PROJECT_NAME} RLBot-BM_CPP pthread)
+    target_link_libraries(${PROJECT_NAME} RLBot-BM_CPP Orbuculum pthread)
 else (UNIX)
-    target_link_libraries(${PROJECT_NAME} RLBot-BM_CPP)
+    target_link_libraries(${PROJECT_NAME} RLBot-BM_CPP Orbuculum)
 endif (UNIX)
 
 target_link_libraries(${PROJECT_NAME} rlutilities_cpp)
