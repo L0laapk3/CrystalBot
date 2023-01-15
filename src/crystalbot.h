@@ -3,15 +3,14 @@
 #include "simulation/game.h"
 #include "rlbot/bot.h"
 #include "utils/ringBuffer.hpp"
-
-#include "Orbuculum.h"
+#include <thread>
 
 class CrystalBot : public rlbot::Bot {
     Game game;
 public:
     CrystalBot(int index, int team, std::string name);
 
-	Orbuculum orb;
+	std::thread predictorThread;
 
 	RingBuffer<RLBotBM::ControllerInput, 20> lastControls;
 

@@ -2,7 +2,6 @@
 
 #include <string>
 #include <iostream>
-#include <thread>
 #include <linear_algebra/vec.h>
 #include <simulation/game.h>
 #include <mechanics/drive.h>
@@ -14,7 +13,7 @@
 #include "rlbot/color.h"
 #include "rlbot/interface.h"
 #include "rlbot/statesetting.h"
-#include "rlbot/bminterface.h"
+#include "rlbot/bmInterface.h"
 
 #include "utils/bridge.h"
 #include "actionSequence.h"
@@ -22,9 +21,16 @@
 
 #include "utils/renderBall.h"
 
+#include "predictor.h"
 
 
-CrystalBot::CrystalBot(int _index, int _team, std::string _name) : Bot(_index, _team, _name) {
+
+CrystalBot::CrystalBot(int _index, int _team, std::string _name) :
+	Bot(_index, _team, _name),
+	predictorThread([](){
+		Predictor predictor;
+		predictor.main();
+	}) {
     // Initialize RLU with the path to the assets folder, relative to the executable.
     rlu::initialize("assets/");
 
@@ -33,6 +39,8 @@ CrystalBot::CrystalBot(int _index, int _team, std::string _name) : Bot(_index, _
 
     // Read field info. Only needs to be called once
     readFieldInfo(game, GetFieldInfo());
+
+
 }
 
 
