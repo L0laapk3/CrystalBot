@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <thread>
 #include <linear_algebra/vec.h>
 #include <simulation/game.h>
 #include <mechanics/drive.h>
@@ -52,9 +53,14 @@ ActionSequence seq;
 ActionSequenceExecutor seqEx;
 ActionSequenceExecutor simSeqEx;
 bool seqInitialized = false;
+
+float lastThrottle = 0;
 RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
-	return RLBotBM::ControllerInput();
+	using namespace std::chrono_literals;
+	// std::this_thread::sleep_for(50ms);
+		
+	return RLBotBM::ControllerInput{ .throttle = 1 };
 
 	// auto& stateSetObj = rlbot::bmInterface->getStateSetObj();
 	// int dt = state.tick - lastTick;

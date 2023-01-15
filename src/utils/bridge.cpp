@@ -80,14 +80,14 @@ void readState(Game &game, const RLBotBM::GameState& state) {
     game.gravity = {0.0f, 0.0f, -650.f}; // todo
 
     if (state.matchEnded)
-        game.state = GameState::Ended;
+        game.state = GameActiveState::Ended;
     else if (state.roundActive) {
 		if (state.balls[0].position.x == 0 && state.balls[0].position.z == 0)
-			game.state = GameState::Kickoff;
+			game.state = GameActiveState::Kickoff;
 		else
-			game.state = GameState::Active;
+			game.state = GameActiveState::Active;
 	} else {
-		game.state = GameState::Inactive;
+		game.state = GameActiveState::Inactive;
 	}
 
     // cars
