@@ -14,9 +14,7 @@ file(GLOB_RECURSE sources ${PROJECT_SOURCE_DIR}/src/*.cpp ${RLBOT-BM_DIR}/src/sh
 add_executable(${PROJECT_NAME} ${sources})
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${RLBOT-BM_CPP_DIR}/inc ${RLBOT-BM_CPP_DIR}/lib/inc)
 target_include_directories(${PROJECT_NAME} PRIVATE ${RLUtilities_DIR}/inc ${RLUtilities_DIR}/inc/*)
-target_include_directories(${PROJECT_NAME} PRIVATE ${Orbuculum_DIR}/src ${Orbuculum_DIR}/src/*)
 
 if (UNIX)
     target_link_libraries(${PROJECT_NAME} RLBot-BM_CPP Orbuculum pthread)
