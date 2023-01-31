@@ -14,17 +14,19 @@ void Predictor::main() {
 	RLBotBM::GameState state;
 	int ticks = 0;
 	int lastsecondTicks = 0;
+	int gameStateTicks = 0;
 	auto lastsecond = std::chrono::high_resolution_clock::now();
 
 	orb.setBotInput({ .throttle = 1 }, 0);
 	while (true) {
 		orb.waitNextTick(state);
-		std::cout << "t";
+		// std::cout << "t";
 		ticks++;
 		if (std::chrono::high_resolution_clock::now() - lastsecond > std::chrono::seconds(1)) {
-			std::cout << "ticks this second: " << ticks - lastsecondTicks << std::endl;
+			std::cout << "ticks this second: " << ticks - lastsecondTicks << " (gamestate ticks: " << state.tick - gameStateTicks << ")" << std::endl;
 			lastsecondTicks = ticks;
-			lastsecond = std::chrono::high_resolution_clock::now();
+			gameStateTicks = state.tick;
+			lastsecond += std::chrono::seconds(1);
 		}
 	}
 }

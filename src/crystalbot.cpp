@@ -67,7 +67,7 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
 	using namespace std::chrono_literals;
 	// std::this_thread::sleep_for(50ms);
-		
+
 	return RLBotBM::ControllerInput{ .throttle = 1 };
 
 	// auto& stateSetObj = rlbot::bmInterface->getStateSetObj();
@@ -79,7 +79,7 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 
 	// if (seqInitialized)
 	// 	seqInitialized = !seqEx.step(seq.end(), dt);
-	
+
     // if (!seqInitialized) {
 	// 	float steer = (float)rand() / RAND_MAX * 2 - 1;
 	// 	int time = 300 * rand() / RAND_MAX;
@@ -89,9 +89,9 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 	// 	seq.push_back({ 2,    { }}); // defines number of statesetting ticks
 	// 	seq.push_back({ 250,  { .throttle = 1, .steer = -.1, .boost = 1 }});
 	// 	seq.push_back({ 1,    { .throttle = 1, .jump = 1 }});
-	// 	seq.push_back({ 10,   { .throttle = 1, .pitch = steer, .yaw = steer, .roll = steer, .jump = 1 }});	
+	// 	seq.push_back({ 10,   { .throttle = 1, .pitch = steer, .yaw = steer, .roll = steer, .jump = 1 }});
 	// 	seq.push_back({ time, { .throttle = 1, .pitch = steer, .yaw = steer, .roll = steer, .boost = 1 }});
-	// 	seq.push_back({ 1,    { .throttle = 1, .steer = steer  }});	
+	// 	seq.push_back({ 1,    { .throttle = 1, .steer = steer  }});
 
 	// 	seqEx.reset(seq.begin());
 	// 	seqInitialized = true;
@@ -109,14 +109,14 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 	// 		stateSetObj.cars[index].boost = 100;
 
 	// 		std::cout << "setting car & ball" << std::endl;
-			
+
 	// 		stateSetObj.cars[index].position = { 0, 2500, 25.53 };
 	// 		stateSetObj.cars[index].velocity = { 0, 0, 0 };
 	// 		stateSetObj.cars[index].angularVelocity = { 0, 0, 0 };
 	// 		stateSetObj.cars[index].orientation = reinterpret_cast<RLBotBM::StateSetQuat&>(quat);
 	// 	} else {
 	// 		if (!hasCapturedTick2) {
-				
+
 	// 		}
 	// 		stateSetObj.cars[index].position = { 0, 2500, 25.53 };
 	// 		stateSetObj.cars[index].velocity = { 0, 0, 0 };
@@ -145,7 +145,7 @@ RLBotBM::ControllerInput CrystalBot::tick(RLBotBM::GameState& state) {
 RLBotBM::ControllerInput CrystalBot::GetOutput(RLBotBM::GameState& state) {
     readState(game, state);
 
-	RLURenderer renderer(std::to_string(index)); 
+	RLURenderer renderer(std::to_string(index));
 	renderBall(renderer, state.balls[0], rlbot::Color::cyan);
 
 	return tick(state);
